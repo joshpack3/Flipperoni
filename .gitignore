@@ -1,9 +1,9 @@
-# ignore your secrets file
+# ignore secrets
 /config.js
 
-# optional: if you ever use dotenv
-.env
+# ignore Node deps if any
+/node_modules/
 
-# common
-node_modules/
+# OS/editor cruft
 .DS_Store
+*.log
