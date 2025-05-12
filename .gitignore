@@ -1,0 +1,9 @@
+# ignore your secrets file
+/config.js
+
+# optional: if you ever use dotenv
+.env
+
+# common
+node_modules/
+.DS_Store

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ESP32 Motor Control via HiveMQ</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 2em; }
+    h1 { text-align: center; }
+    .motor { margin: 1.5em 0; }
+    .motor label { display: block; margin-bottom: 0.5em; }
+    .motor input[type=range] { width: 100%; }
+    .status { margin-top: 1em; color: green; }
+  </style>
+</head>
+<body>
+  <h1>ESP32 Dual‑Motor Control</h1>
+  <div class="motor">
+    <label for="motor1">Motor 1 (µs): <span id="val1">1500</span></label>
+    <input type="range" id="motor1" min="1000" max="2000" value="1500">
+  </div>
+  <div class="motor">
+    <label for="motor2">Motor 2 (µs): <span id="val2">1500</span></label>
+    <input type="range" id="motor2" min="1000" max="2000" value="1500">
+  </div>
+  <div class="status" id="connStatus">Connecting to MQTT…</div>
+
+  <!-- MQTT.js from CDN -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script type="module">
+    import { MQTT_HOST, MQTT_USERNAME, MQTT_PASSWORD } from './config.js';
+    const client = mqtt.connect(MQTT_HOST, {
+      username: MQTT_USERNAME,
+      password: MQTT_PASSWORD
+    });
+
+    const statusEl = document.getElementById('connStatus');
+    client.on('connect', () => {
+      statusEl.textContent = '🟢 MQTT connected';
+      // Optional: subscribe to status or telemetry topics…
+    });
+    client.on('error', err => {
+      statusEl.textContent = '🔴 MQTT error: ' + err;
+    });
+
+    function setupMotor(id, topic) {
+      const slider = document.getElementById(id);
+      const display = document.getElementById('val' + id.slice(-1));
+      slider.addEventListener('input', () => {
+        const v = slider.value;
+        display.textContent = v;
+        client.publish(topic, v);
+      });
+    }
+
+    // Motor 1 → topic “esp32/motor/1/set”
+    // Motor 2 → topic “esp32/motor/2/set”
+    setupMotor('motor1', 'esp32/motor/1/set');
+    setupMotor('motor2', 'esp32/motor/2/set');
+  </script>
+</body>
+</html>
